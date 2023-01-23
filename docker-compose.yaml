@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  cdp:
+    depends_on:
+      - db
+    build: cdp
+    hostname: cdp
+    environment:
+      - DB=postgresql://cdp:strongPW@db:5432/cdp
+    ports:
+      - 8080:5000
+  db:
+    image: postgres:latest
+    hostname: db
+    environment:
+      - POSTGRES_USER=cdp
+      - POSTGRES_PASSWORD=strongPW
+      - POSTGRES_DB=cdp
+    volumes:
+      - ~/Desktop/docker/Volumes/pgData:/var/lib/postgresql/data
+      #- ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
