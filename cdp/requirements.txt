@@ -5,3 +5,4 @@ flask-cors
 psycopg2
 pyjwt
 pyotp
+gunicorn
