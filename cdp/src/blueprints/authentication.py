@@ -42,7 +42,7 @@ def login():
             token = jwt.encode({"uid": user.id, "user": user.username, "admin":user.admin,"exp":expTime}, secret_key)
             return {"token":token}
         else:
-            return {"response":"Username or Password wrong!"},403
+            return {"response":"Username or Password wrong!"},401
     elif user.authmethod == 2: # 2FA Auth
         totpCheck = pyotp.TOTP(user.secretkey)
         if check_password_hash(user.password,password) and totpCheck.verify(totp,valid_window=2):
@@ -50,7 +50,7 @@ def login():
             token = jwt.encode({"uid": user.id, "user": user.username, "admin":user.admin,"strongauth":True,"exp":expTime}, secret_key)
             return {"token":token}
         else:
-            return {"response":"Username, Password or TOTP wrong"},403
+            return {"response":"Username, Password or TOTP wrong"},401
     elif user.authmethod == 3: # Only TOTP
         totpCheck = pyotp.TOTP(user.secretkey)
         if totpCheck.verify(otp=str(totp),valid_window=2):
@@ -60,7 +60,7 @@ def login():
         else:
             return {"response":"TOTP wrong"},403
     else:
-        return {"response":"Authentication not successfull!"},403
+        return {"response":"Authentication not successfull!"},401
     
 
 @auth_bp.route("/users/gentotp",methods=['GET'])

@@ -52,6 +52,8 @@ function creatUserCard(user){
 }
 
 function showLogin(user){
+    let pwWrong = document.getElementById('pwWrong');
+    pwWrong.hidden = true;
     console.log("Show Login for User: "+ user.id + " AuthMethod = " + user.authmethod)
     // first check User AuthMethod 0 = PIN ; 1= Password; 2= 2FA, 3=TOTP Only
     if (user.authmethod == 0 || user.authmethod == 3 ){
@@ -72,7 +74,7 @@ function addPin(number){
     if (pin.length == 4 || pin.length == 6){
         //Automatic Login try:
         console.log("Automatic Login Try");
-        login(getCookie("user"),pin,pin);
+        login(getCookie("user"),pin,pin,true);
 
     }
 }
@@ -86,15 +88,21 @@ function pinChanged(){
     if (pin.length == 4 || pin.length == 6){
         //Automatic Login try:
         console.log("Automatic Login Try");
-        login(getCookie("user"),pin,pin);
+        login(getCookie("user"),pin,pin,true);
 
     }
 }
 
-function login(user,pin,totp){
-    console.log("Login for User: " +user + " entered PIN: "+ pin);
+function btnclick_login(){
+    pinEntry = document.getElementById('pinEntry');
+    let pin = pinEntry.value;
+    login(getCookie("user"),pin,pin,false);
+}
+
+function login(user,pin,totp,auto){
+    console.log("Automatic status: " + auto)
     let bodydata = JSON.stringify({username:user,password:pin});
-    console.log("Login with: "+ bodydata);
+    console.log(bodydata);
     fetch(cdpServer+'/login',{
         method: 'POST',
         headers: {
@@ -104,11 +112,24 @@ function login(user,pin,totp){
         body: bodydata
     })
     .then(response => {
+        if (response.status == 401 && !auto){
+            let pwWrong = document.getElementById('pwWrong');
+            pwWrong.hidden = false;
+            message = document.createElement('div');
+            message.className = 'alert alert-danger';
+            message.role = 'alert';
+            message.innerText = 'Username oder Passwort falsch';
+            pwWrong.appendChild(message);
+            
+        }
         return response.json();
     })
-    .then(token => {
-        if (token){
-            setCookie("token",token.token,5);
+    .then(resp => {
+        if (resp.token){
+            setCookie("token",resp.token,5);
+            window.location.href = '/user.html';
+        }else{
+            console.log(resp);
         }
     })
 
