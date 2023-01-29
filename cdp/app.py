@@ -1,14 +1,26 @@
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from datetime import datetime
+from flask_cors import CORS
+from datetime import datetime, timedelta
+from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
+
+import pyotp
+import time
+import jwt
+import json
 import os
 
 app = Flask(__name__)
+cors = CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+
 migrate = Migrate()
 db = SQLAlchemy(app)
 migrate.init_app(app,db)
+
 
 
 class Users(db.Model):
@@ -20,11 +32,13 @@ class Users(db.Model):
     lastname = db.Column(db.String(200))
     falseLogonCount = db.Column(db.Integer, nullable=False, default=0)
     password = db.Column(db.String(200))
-    salt = db.Column(db.String(200))
+    secretkey = db.Column(db.String(200))
+    authmethod = db.Column(db.Integer,nullable=False, default=0)
     username = db.Column(db.String(200),unique=True,nullable=False)
     displayname = db.Column(db.String(200),nullable=False)
     email = db.Column(db.String(200))
     balance = db.Column(db.Integer, default=0)
+    admin = db.Column(db.Boolean, default=False)
     created_on = db.Column(db.DateTime)
     last_login = db.Column(db.DateTime)
     def __repr__(self):
@@ -32,12 +46,50 @@ class Users(db.Model):
     def __str__(self):
         return "{{'id':{self.id},'active':{self.active},'favorite':{self.favorite},'firstname':{self.firstname},'lastname':{self.lastname},'username':{self.username},'displayname':{self.displayname},'email':{self.email},'balance':{self.balance},'created_on':{self.created_on},'last_login':{self.last_login}, 'falseLogonCount':{self.falseLogonCount}}}"
     def toJson(self):
-        userJson = {'id': self.id, 'active':self.active,'favorite':self.favorite,'firstname':self.firstname,'lastname':self.lastname,'username':self.username,'displayname':self.displayname,'email':self.email,'balance':self.balance,'created_on':self.created_on,'last_login':self.last_login, 'falseLogonCount':self.falseLogonCount}
+        userJson = {'id': self.id, 'active':self.active,'favorite':self.favorite,'firstname':self.firstname,'lastname':self.lastname,'username':self.username,'displayname':self.displayname,'email':self.email,'balance':self.balance,'created_on':self.created_on,'last_login':self.last_login, 'falseLogonCount':self.falseLogonCount, 'authmethod':self.authmethod }
         return userJson
+    def toJsonDetailed(self):
+        userJson = {'id': self.id, 'active':self.active,'admin':self.admin,'favorite':self.favorite,'firstname':self.firstname,'lastname':self.lastname,'username':self.username,'displayname':self.displayname,'email':self.email,'balance':self.balance,'created_on':self.created_on,'last_login':self.last_login, 'falseLogonCount':self.falseLogonCount, 'password':self.password, 'secretKey':self.secretkey,'authmethod':self.authmethod}
+        return userJson
+    def debit(id,amount):
+        user = Users.query.get_or_404(id)
+        user.balance = user.balance - amount
+        return 0
 
-@app.route("/")
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.args.get('token')
+        if not token:
+            return {"response":"Token is missing!"},403
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        except:
+             return {"response":"Token is invalid!"},403
+        
+        return f(*args, **kwargs)
+    return decorated
+
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.args.get('token')
+        if not token:
+            return {"response":"Token is missing!"},403
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            if data['admin'] is not True:
+                return {"response":"User is not an Admin"},403
+        except:
+                return {"response":"Token is invalid!"},403
+        
+        return f(*args, **kwargs)
+    return decorated
+
+
+@app.route("/tea")
 def home():
-    return render_template('index.html')
+    return {"response":"I am not a teapot"},418
 
 @app.route("/users")
 def get_users():
@@ -49,12 +101,43 @@ def get_users():
         output.append(user_data)
 
     return output
-@app.route("/users/<id>")
+@app.route("/users/<id>",methods=['GET'])
+@admin_required
 def get_user(id):
     user = Users.query.get_or_404(id)
-    return user.toJson()
+    return user.toJsonDetailed()
+
+@app.route("/users/<id>",methods=['PATCH'])
+def update_user(id):
+    user = Users.query.get_or_404(id)
+    json = request.get_json()
+    try: user.firstname = json['firstname']
+    except: None
+    try: user.lastname = json['lastname']
+    except: None
+    try: user.username = json['username']
+    except: None
+    try: user.favorite = bool(json['favorite'])
+    except:None
+    try: user.displayname = json['displayname']
+    except:None
+    try: user.active = bool(json['active'])
+    except:None
+    try: user.admin = bool(json['admin'])
+    except:None
+    try: user.email = json['email']
+    except:None
+    try: user.password = generate_password_hash(json['password'])
+    except:None
+    try: user.authmethod = json['authmethod']
+    except:None
+
+    db.session.commit()
+    return user.toJsonDetailed()
 
 @app.route("/users", methods=['POST'])
+@admin_required
+
 def add_user():
     try: str_first = request.json['firstname'] 
     except: str_first = None
@@ -64,10 +147,19 @@ def add_user():
     except: bool_fav = True
     try: str_mail = request.json['email']
     except: str_mail = None
-    user = Users(username=request.json['username'],displayname=request.json['displayname'],firstname=str_first, lastname=str_last, favorite=bool_fav,  email=str_mail, created_on=datetime.now())
-    db.session.add(user)
-    db.session.commit()
-    return f'"id":"{user.id}"'
+    try: bool_admin = request.json['admin']
+    except: bool_admin = False
+    try: str_user = request.json['username']
+    except: return {"response":"Username is required!"},400
+    try: str_pass = generate_password_hash(request.json['password'])
+    except: str_pass = generate_password_hash("")
+    if Users.query.filter_by(username=str_user).first() is None:
+        user = Users(username=str_user,displayname=request.json['displayname'],firstname=str_first, lastname=str_last, favorite=bool_fav,  email=str_mail,admin=bool_admin, password=str_pass, created_on=datetime.now())
+        db.session.add(user)
+        db.session.commit()
+        return f'"id":"{user.id}"',201
+    else:
+        return {"response":"Username already taken!"},400
 
 @app.route("/users/<id>", methods=['DELETE'])
 def delete_user(id):
@@ -141,7 +233,9 @@ class Products(db.Model):
     def toJson(self):
         productJson = {'id':self.id, 'active':self.active, 'productname':self.productname, 'price':self.price, 'category': self.category, 'image':self.image}
         return productJson
-
+    def getPrice(id):
+        product = Products.query.get_or_404(id)
+        return product.price
 
 @app.route("/products")
 def get_products():
@@ -215,39 +309,92 @@ def get_purchases():
 
 @app.route("/purchases", methods=['POST'])
 def add_purchase():
-    try: int_purchid = request.json['purchaseid']
-    except: 
-        try: 
-            last_purchid = Purchases.query.order_by(Purchases.purchaseid.desc()).first()
-            int_purchid = last_purchid.purchaseid+1
-        except: int_purchid = 0
-    try: uid = request.json['userid']
-    except: return {"response":"Error - No userid defined"}
-    try: uid = int(uid)
-    except: return {"response":"Error - Userid not integer"}
-    if Users.query.get(uid) == None:
-        return {"response":"Error - User not found"}
-    try: prodid = request.json['productid']
-    except: return {"response":"Error - No productid defined"}
-    try: prodid = int(prodid)
-    except: return {"response":"Error - Productid not integer"}
-    if Products.query.get(prodid) == None:
-        return {"response":"Error - Product not found"}
-    try: int_amount = request.json['amount']
-    except: int_amount = 1
-    purchase = Purchases(purchaseid = int_purchid, userid = uid, productid=prodid, amount=int_amount, timestamp = datetime.now() )
-
-    ## TO DO ##
-    # Calculate Purchase and remove money from user!
-    ###
-    db.session.add(purchase)
+    try: 
+        last_purchid = Purchases.query.order_by(Purchases.purchaseid.desc()).first()
+        int_purchid = last_purchid.purchaseid+1
+    except: int_purchid = 0
+    json = request.get_json()
+    try: uid = json['userid']
+    except: return {"response":"Userid must be set!"},400
+    try: products = json['products']
+    except: return {"response":"No products set!"},400
+    price = 0
+    for product in products:
+        try: prodid = product['productid']
+        except: return {"response":"No productid set!"},400
+        try: int_amount = product['amount']
+        except: int_amount = 1
+        purchase = Purchases(purchaseid = int_purchid, userid = uid, productid=prodid, amount=int_amount, timestamp = datetime.now() )
+        db.session.add(purchase)
+        price += Products.getPrice(prodid)*int_amount
+    
+    Users.debit(uid,price)
     db.session.commit()
-    return f'"id":"{purchase.id}"'
+    return {"id":purchase.id,"price":price}
 
+
+@app.route("/login",methods=['POST'])
+def login():
+    info = json.loads(request.data)
+
+    try:
+        if os.getenv('AdminToken') != "":
+            if info['token'] == os.getenv('AdminToken'):
+                expTime = datetime.utcnow() + timedelta(minutes=30)
+                token = jwt.encode({"uid": 0, "user": "MasterRoot", "admin":True,"exp":expTime}, app.config['SECRET_KEY'])
+                return {"token":token}
+    except: os.environ['AdminToken'] = ""
+    username = info.get('username','guest')
+    password = info.get('password','')
+    totp = info.get('totp','')
+     
+    user = Users.query.filter_by(username=username, active=True).first()
+    if user is None:
+        return {"response": "User not found or not active"},404
+    
+    if user.authmethod >= 1: # Normal 0Pin/1Password Auth
+        if check_password_hash(user.password,password):
+            expTime = datetime.utcnow() + timedelta(minutes=30)
+            token = jwt.encode({"uid": user.id, "user": user.username, "admin":user.admin,"exp":expTime}, app.config['SECRET_KEY'])
+            return {"token":token}
+        else:
+            return {"response":"Username or Password wrong!"},403
+    elif user.authmethod == 2: # 2FA Auth
+        totpCheck = pyotp.TOTP(user.secretkey)
+        if check_password_hash(user.password,password) and totpCheck.verify(totp,valid_window=2):
+            expTime = datetime.utcnow() + timedelta(minutes=30)
+            token = jwt.encode({"uid": user.id, "user": user.username, "admin":user.admin,"strongauth":True,"exp":expTime}, app.config['SECRET_KEY'])
+            return {"token":token}
+        else:
+            return {"response":"Username, Password or TOTP wrong"},403
+    elif user.authmethod == 3: # Only TOTP
+        totpCheck = pyotp.TOTP(user.secretkey)
+        if totpCheck.verify(otp=str(totp),valid_window=2):
+            expTime = datetime.utcnow() + timedelta(minutes=30)
+            token = jwt.encode({"uid": user.id, "user": user.username, "admin":user.admin,"exp":expTime}, app.config['SECRET_KEY'])
+            return {"token":token}
+        else:
+            return {"response":"TOTP wrong"},403
+    
+
+@app.route("/users/gentotp",methods=['GET'])
+def generate_totp():
+    token = request.args.get('token')
+    if not token:
+        return {"response":"Token missing"},400
+    try:
+        data = jwt.decode(token, app.config['SECRET_KEY'],algorithms=['HS256'])
+    except: return {"response":"Token invalid"},400
+    secKey = pyotp.random_base32()
+    user = Users.query.get_or_404(data['uid'])
+    user.secretkey = secKey
+    db.session.commit()
+    qrcodeData = "otpauth://totp/" + user.displayname + "?secret=" + secKey + "&issuer=CDP"
+    return {"secretkey": secKey,"qrcodeData":qrcodeData}
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
     with app.app_context():
         db.create_all()
     app.run(debug=True, host='0.0.0.0', port=port)
-    
+ 

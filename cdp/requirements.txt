@@ -1,4 +1,7 @@
 Flask
 flask_sqlalchemy
 flask_migrate
+flask-cors
 psycopg2
+pyjwt
+pyotp

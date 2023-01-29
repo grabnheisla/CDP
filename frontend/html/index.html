@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coffee Distribution Point</title>
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css"> -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous"> -->
+</head>
+
+<body class="bg-dark">
+  <h1 class="text-light">Coffee Distribution Point</h1>
+  <script src="start.js"></script>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <div id="userlist" class="row row-cols row-cols-md g-4">
+  </div>
+  <div id="pinfieldModal" class="modal fade" role="dialog" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="container">
+            <div class="row mt-3">
+              <div class="col">
+                <input id="pinEntry" type="password" class="form-control col-12" placeholder="PIN"></input>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col">
+                <button type="button" class="btn btn-primary col-12" onclick="addPin(1)">1</button>
+              </div>
+              <div class="col">
+                <button type="button" class="btn btn-primary col-12" onclick="addPin(2)">2</button>
+              </div>
+              <div class="col">
+                <button type="button" class="btn btn-primary col-12" onclick="addPin(3)">3</button>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col">
+                <button type="button" class="btn btn-primary col-12" onclick="addPin(4)">4</button>
+              </div>
+              <div class="col">
+                <button type="button" class="btn btn-primary col-12" onclick="addPin(5)">5</button>
+              </div>
+              <div class="col">
+                <button type="button" class="btn btn-primary col-12" onclick="addPin(6)">6</button>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col">
+                <button type="button" class="btn btn-primary col-12" onclick="addPin(7)">7</button>
+              </div>
+              <div class="col">
+                <button type="button" class="btn btn-primary col-12" onclick="addPin(8)">8</button>
+              </div>
+              <div class="col">
+                <button type="button" class="btn btn-primary col-12" onclick="addPin(9)">9</button>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col">
+                <button type="button" class="btn btn-primary col-12">Login</button>
+              </div>
+              <div class="col">
+                <button type="button" class="btn btn-primary col-12" onclick="addPin(0)">0</button>
+              </div>
+              <div class="col">
+                <button type="button" class="btn btn-primary col-12">Delete</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  </div>
+
+</body>
+
+</html>
