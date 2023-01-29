@@ -12,7 +12,7 @@
 
 <body class="bg-dark">
   <h1 class="text-light">Coffee Distribution Point</h1>
-  <script src="start.js"></script>
+
   <script src="js/bootstrap.bundle.min.js"></script>
   <div id="userlist" class="row row-cols row-cols-md g-4">
   </div>
@@ -23,7 +23,7 @@
           <div class="container">
             <div class="row mt-3">
               <div class="col">
-                <input id="pinEntry" type="password" class="form-control col-12" placeholder="PIN"></input>
+                <input id="pinEntry" type="password" class="form-control col-12" placeholder="PIN" oninput="pinChanged()"></input>
               </div>
             </div>
             <div class="row mt-3">
@@ -67,7 +67,7 @@
                 <button type="button" class="btn btn-primary col-12" onclick="addPin(0)">0</button>
               </div>
               <div class="col">
-                <button type="button" class="btn btn-primary col-12">Delete</button>
+                <button type="button" class="btn btn-primary col-12" onclick="backspacePin()">Delete</button>
               </div>
             </div>
 
@@ -79,6 +79,7 @@
   </div>
   </div>
 
+  <script src="start.js"></script>
 </body>
 
 </html>
