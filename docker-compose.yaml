@@ -36,5 +36,5 @@ services:
      - ./frontend/html:/usr/share/nginx/html
     ports: 
       - "81:80"
-      - "443:4431"
+      - "443:443"
     
