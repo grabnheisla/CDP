@@ -1,28 +1,9 @@
+
 console.log("Start Javascript");
 const cdpServer = "https://" + window.location.hostname + "/api"
 
 
-function setCookie(cname, cvalue, exmin) {
-    const d = new Date();
-    d.setTime(d.getTime() + (exmin * 60 * 1000));
-    let expires = "expires="+d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";SameSite=Strict";
-  }
 
-function getCookie(cname){
-    let name = cname + "=";
-    let ca = document.cookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1);
-      }
-      if (c.indexOf(name) == 0) {
-        return c.substring(name.length, c.length);
-      }
-    }
-    return "";
-}
 function creatUserCard(user){
     let userlist = document.getElementById('userlist');
 

@@ -39,7 +39,7 @@ def login():
         if check_password_hash(user.password,password):
             expTime = datetime.utcnow() + timedelta(minutes=30)
             # return {"token_payload":{"uid": str(user.id), "user": user.username, "admin":str(user.admin),"exp":expTime}}
-            token = jwt.encode({"uid": user.id, "user": user.username, "admin":user.admin,"exp":expTime}, secret_key)
+            token = jwt.encode({"uid": user.id, "user": user.username,"displayname":user.displayname, "admin":user.admin,"exp":expTime}, secret_key)
             return {"token":token}
         else:
             return {"response":"Username or Password wrong!"},401
@@ -47,7 +47,7 @@ def login():
         totpCheck = pyotp.TOTP(user.secretkey)
         if check_password_hash(user.password,password) and totpCheck.verify(totp,valid_window=2):
             expTime = datetime.utcnow() + timedelta(minutes=30)
-            token = jwt.encode({"uid": user.id, "user": user.username, "admin":user.admin,"strongauth":True,"exp":expTime}, secret_key)
+            token = jwt.encode({"uid": user.id, "user": user.username,"displayname":user.displayname, "admin":user.admin,"exp":expTime}, secret_key)
             return {"token":token}
         else:
             return {"response":"Username, Password or TOTP wrong"},401
@@ -55,7 +55,7 @@ def login():
         totpCheck = pyotp.TOTP(user.secretkey)
         if totpCheck.verify(otp=str(totp),valid_window=2):
             expTime = datetime.utcnow() + timedelta(minutes=30)
-            token = jwt.encode({"uid": user.id, "user": user.username, "admin":user.admin,"exp":expTime}, secret_key)
+            token = jwt.encode({"uid": user.id, "user": user.username,"displayname":user.displayname, "admin":user.admin,"exp":expTime}, secret_key)
             return {"token":token}
         else:
             return {"response":"TOTP wrong"},403

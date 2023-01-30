@@ -3,8 +3,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from extensions.tokens import tokens
 from datetime import datetime
 from main import db
+import jwt, os
 users_bp = Blueprint('users_bp',__name__)
-
+secret_key = os.environ.get('SECRET_KEY')
 
 class Users(db.Model):
     __tablename__ = 'users'
@@ -41,7 +42,15 @@ class Users(db.Model):
 
 @users_bp.route("/users")
 def get_users():
-    users = Users.query.all()
+    token = request.args.get('token')
+    users = Users.query.filter(Users.favorite)
+    if token:
+        try:
+            data = jwt.decode(token, secret_key, algorithms=['HS256'])
+            if data['admin'] is True:
+                users = Users.query.all()
+        except:
+            users = Users.query.filter(Users.favorite)       
     output = []
     for user in users:
         user_data = user.toJson()
