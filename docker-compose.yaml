@@ -10,8 +10,8 @@ services:
       - DB=postgresql://cdp:strongPW@db:5432/cdp
       - SECRET_KEY=GenerateRandomSecret
       - AdminToken=RandomTokenDataHere
-    ports:
-      - 8080:8000
+    # ports:
+    #   - 8080:8000
   db:
     image: postgres:latest
     hostname: db
@@ -35,6 +35,6 @@ services:
     volumes:
      - ./frontend/html:/usr/share/nginx/html
     ports: 
-      - "81:80"
+      # - "81:80"
       - "443:443"
     

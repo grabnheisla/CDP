@@ -12,33 +12,45 @@
 
 <body class="bg-dark">
   <div class="container-fluid">
-    <div class="row flex-nowrap">
-        <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-primary">
+    <div class="row">
+      <div class="col-sm-auto bg-primary sticky-top">
+        <div class="d-flex flex-sm-column flex-row flex-nowrap bg-primary align-items-left sticky-top">
           <div class="d-flex flex-column">
             <span id="greeting" class="fs-5 d-none d-sm-inline text-white">Hallo </span>
           </div>
-            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-light min-vh-100">
-
-                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
-                    <li class="nav-item">
-                        <a href="/" class="nav-link align-middle px-0">
-                            <img src="icons/box-arrow-in-left.svg" style="width: 25px; margin-right: 5px;"> <span class="ms-1 d-none d-sm-inline text-light">Login</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link align-middle px-0">
-                            <img src="icons/basket-fill.svg" style="width: 25px; margin-right: 5px;"> <span class="ms-1 d-none d-sm-inline text-light">Einkaufen</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="#" class="nav-link align-middle px-0">
-                          <img src="icons/sliders.svg" style="width: 25px; margin-right: 5px;"> <span class="ms-1 d-none d-sm-inline text-light">Einstellungen</span>
-                      </a>
-                  </li>
-                </ul>
-
-            </div>
+          <ul
+            class="nav nav-pills nav-flush flex-sm-column flex-row flex-nowrap mb-auto mx-auto text-left align-items-left">
+            <li class="nav-item">
+              <a href="/" class="nav-link py-3 px-2" data-bs-toggle="tooltip" data-bs-placement="right"
+                data-bs-original-title="Login">
+                <img src="icons/box-arrow-in-left.svg" style="width: 25px;"> <span
+                  class="ms-1 d-none d-sm-inline text-light">Login</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link py-3 px-2" data-bs-toggle="tooltip" data-bs-placement="right"
+                data-bs-original-title="Einkaufen">
+                <img src="icons/basket-fill.svg" style="width: 25px;"> <span
+                  class="ms-1 d-none d-sm-inline text-light">Einkaufen</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link py-3 px-2" data-bs-toggle="tooltip" data-bs-placement="right"
+                data-bs-original-title="Einstellungen">
+                <img src="icons/sliders.svg" style="width: 25px;">
+                <span class="ms-1 d-none d-sm-inline text-light">Einstellungen</span>
+              </a>
+            </li>
+          </ul>
         </div>
+      </div>
+      <div class="col-sm p-2 min-vh-100">
+        <div id="products" class="row">
+
+        </div>
+      </div>
+    </div>
+  </div>
   <script src="user.js"></script>
 
 </body>
