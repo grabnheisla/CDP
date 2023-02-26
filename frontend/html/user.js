@@ -39,8 +39,12 @@ const parseJwt = (token) => {
 let tokenContent = parseJwt(cookie_token);
 let greeting = document.getElementById('greeting');
 greeting.innerText = 'Hallo '+tokenContent.displayname
-
-
+console.log(tokenContent);
+if (tokenContent.admin == true){
+  console.log("Hello Admin");
+  let settings = document.getElementById('admin-settings');
+  settings.removeAttribute('hidden');
+}
 function createProductCard(product) {
   console.log(product);
   let btnGroup = document.createElement('div');

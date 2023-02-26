@@ -41,12 +41,26 @@
                 <span class="ms-1 d-none d-sm-inline text-light">Einstellungen</span>
               </a>                
             </li>
-            <li class="nav-item" id="admin-settings" hidden="yes">
+            <li class="nav-item" id="adminold-settings" hidden="yes">
               <a href="/admin.html" class="nav-link py-3 px-2" aria-haspopup="true" aria-expanded="true" data-bs-toggle="tooltip" data-bs-placement="right"
-              data-bs-original-title="Administration">
+              data-bs-original-title="Administration" role="button">
               <img src="icons/sliders.svg" style="width: 25px;">
               <span class="ms-1 d-none d-sm-inline text-light">Administration</span>
             </a> 
+            </li>
+            <li class="nav-item" id="admin-settings" hidden="yes">
+              <button class="btn btn-toggle collapsed m-0 d-none d-sm-inline text-light py-3 px-2" data-bs-toggle="collapse" data-bs-target="#account-collapse" aria-expanded="false">
+                <img src="icons/gear.svg" style="width: 25px;"> Administration
+              </button>
+              <div class="collapse" id="account-collapse">
+                <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                  <li><a href="#" class="nav-link ms-1 d-none d-sm-inline text-light">
+                    <img src="icons/person-add.svg" style="width: 25px;"> User</a></li>
+                  <li><a href="#" class="ms-1 d-none d-sm-inline text-light">Profile</a></li>
+                  <li><a href="#" class="link-dark rounded">Settings</a></li>
+                  <li><a href="#" class="link-dark rounded">Sign out</a></li>
+                </ul>
+              </div>
             </li>
           </ul>
         </div>
@@ -58,7 +72,8 @@
       </div>
     </div>
   </div>
-  <script src="user.js"></script>
+  <script src="/js/bootstrap.bundle.min.js"></script>
+  <script src="admin.js"></script>
 
 </body>
 
