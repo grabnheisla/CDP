@@ -37,8 +37,8 @@ const parseJwt = (token) => {
   };
   
 let tokenContent = parseJwt(cookie_token);
-let greeting = document.getElementById('greeting');
-greeting.innerText = 'Hallo '+tokenContent.displayname
+let username = document.getElementById('username');
+username.innerText = tokenContent.displayname
 console.log(tokenContent);
 if (tokenContent.admin == true){
   console.log("Hello Admin");
@@ -54,12 +54,12 @@ function createProductCard(product) {
 
   let btn1 = document.createElement('button');
   btn1.type='button';
-  btn1.className='btn btn-lg btn-primary btn-block';
+  btn1.className='btn btn-lg btn-primary';
   btn1.innerHTML='<img src="icons/basket.svg">';
 
   let btn2 = document.createElement('button');
   btn2.type='button';
-  btn2.className='btn btn-lg btn-primary btn-block';
+  btn2.className='btn btn-lg btn-primary';
   btn2.innerHTML='<img src="icons/send.svg">';
 
   btnGroup.appendChild(btn1);
@@ -92,7 +92,7 @@ function createProductCard(product) {
 
 
   let prodcol = document.createElement('div');
-  prodcol.className = 'col-sm-2 my-1';
+  prodcol.className = 'col-md-4';
   prodcol.appendChild(card);
 
   let productList = document.getElementById('products');
